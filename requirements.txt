@@ -1,0 +1,8 @@
+--python 3
+
+libraries for python:
+--flask
+--requests
+--psycopg2
+
+--postgredb
