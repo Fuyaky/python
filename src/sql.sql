@@ -13,11 +13,11 @@ SET default_tablespace = '';
 
 SET default_table_access_method = heap;
 
-CREATE TABLE public.nfts (
+CREATE TABLE public.nft (
     nft_address character varying,
     nft_metadata character varying
 );
-ALTER TABLE public.nfts OWNER TO postgres;
+ALTER TABLE public.nft OWNER TO postgres;
 CREATE TABLE public.testvalues (
     randomstring character varying(50)
 );
