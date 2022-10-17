@@ -7,11 +7,7 @@ app = Flask(__name__)
 
 
 def check_in_db(address):
-    connection = psycopg2.connect(user="postgres",
-                                  password="faha",
-                                  host="127.0.0.1",
-                                  port="5432",
-                                  database="db_nft")
+    connection = psycopg2.connect("dbname=db_nft user=postgres password='faha' port=5433")
     cur = connection.cursor()
     cur.execute("SELECT * FROM nft where nft_address='"+address+"'")
     if(cur.rowcount==0):
@@ -23,26 +19,26 @@ def form_example():
     if request.method == 'POST':
         answer=""
         address = request.form.get('address')
-        if (check_in_db(address)):
-            connection = psycopg2.connect(user="postgres", password="faha", host="127.0.0.1", port="5432",
-                                          database="db_nft")
-
+        if check_in_db(address):
+            connection = psycopg2.connect("dbname=db_nft user=postgres password='faha' port=5433")
             cur = connection.cursor()
             cur.execute("SELECT nft_metadata FROM nft where nft_address='"+address+"'")
             records = cur.fetchall()
             answer=records[0][0]
         else:
             url = "https://solana-gateway.moralis.io/nft/mainnet/{}/metadata".format(address)
+
             headers = {
                 "accept": "application/json",
                 "X-API-Key": "KWWugGMUt7x1iqf0sAjQK9LlRa92jROvaX37DcMZjiiDxtfW4pX04TArIYE6JpZw"
             }
-            answer = requests.get(url, headers=headers).text
-            connection = psycopg2.connect(user="postgres", password="faha", host="127.0.0.1", port="5432",
-                                          database="db_nft")
+
+            response = requests.get(url, headers=headers)
+            answer = response.text
+            connection = psycopg2.connect("dbname=db_nft user=postgres password='faha' port=5433")
 
             cur = connection.cursor()
-            cur.execute("insert into nft(nft_address,nft_metadata) values('{}','{}')".format(address, returnValue))
+            cur.execute("insert into nft(nft_address,nft_metadata) values('{}','{}')".format(address, answer))
             connection.commit()
         return '''
                         <h1>{}</h1>
@@ -57,4 +53,4 @@ def form_example():
 
 
 if __name__ == '__main__':
-    app.run(debug=True, port=5432)
+    app.run(debug=True, port=5000)
