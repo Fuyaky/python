@@ -4,28 +4,15 @@ import json
 import psycopg2
 app = Flask(__name__)
 
-
-
-def check_in_db(address):
-    connection = psycopg2.connect("dbname=db_nft user=postgres password='faha' port=5433")
-    cur = connection.cursor()
-    cur.execute("SELECT * FROM nft where nft_address='"+address+"'")
-    if(cur.rowcount==0):
-        return False
-    return True
-
 @app.route('/', methods=['GET', 'POST'])
 def form_example():
     if request.method == 'POST':
         answer=""
         address = request.form.get('address')
-        if check_in_db(address):
-            connection = psycopg2.connect("dbname=db_nft user=postgres password='faha' port=5433")
-            cur = connection.cursor()
-            cur.execute("SELECT nft_metadata FROM nft where nft_address='"+address+"'")
-            records = cur.fetchall()
-            answer=records[0][0]
-        else:
+        connection = psycopg2.connect("dbname=db_nft user=postgres password='faha' port=5433")
+        cur = connection.cursor()
+        cur.execute("SELECT nft_metadata FROM nft where nft_address='" + address + "'")
+        if cur.rowcount==0:
             url = "https://solana-gateway.moralis.io/nft/mainnet/{}/metadata".format(address)
 
             headers = {
@@ -40,14 +27,17 @@ def form_example():
             cur = connection.cursor()
             cur.execute("insert into nft(nft_address,nft_metadata) values('{}','{}')".format(address, answer))
             connection.commit()
+        else:
+            records = cur.fetchall()
+            answer = records[0][0]
         return '''
-                        <h1>{}</h1>
+                        <p>{}</p>
                           '''.format(answer)
 
     # otherwise handle the GET request
     return '''
-                   <form method="POST"style="margin: auto; width: 220px; text-align: center;">
-                       <div><label>address: <input type="text" name="address"></label></div>
+                   <form method="POST">
+                       <label>Enter nft address: <input type="text" name="address"></label>
                        <input type="submit" value="Submit">
                    </form>'''
 
